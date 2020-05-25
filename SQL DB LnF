@@ -1,0 +1,199 @@
+The Code
+--dropping all table that might exist error free. Entities that contain foreign keys must be first. 
+IF OBJECT_ID('dbo.VendorBuyer') IS NOT NULL
+		DROP TABLE dbo.VendorBuyer;
+go
+IF OBJECT_ID('dbo.VendorCompany') IS NOT NULL
+		DROP TABLE dbo.VendorCompany;
+go
+IF OBJECT_ID('dbo.BuyerCompany') IS NOT NULL
+		DROP TABLE dbo.BuyerCompany;
+go
+IF OBJECT_ID('dbo.Item') IS NOT NULL
+		DROP TABLE dbo.Item;
+go
+IF OBJECT_ID('dbo.TruckingCompany') IS NOT NULL
+		DROP TABLE dbo.TruckingCompany;
+go
+			
+--Table for the vendor company 							
+Create Table VendorCompany (							
+	 VendorID int primary key						
+	, VendorName  Varchar (20) not null						
+	, DaysReceivableOutstanding Varchar (3) not null default '0'						
+)	
+
+Insert into VendorCompany (VendorID, VendorName, DaysReceivableOutstanding)	
+values ('472701', 'Hasbro', '74')
+Insert into VendorCompany (VendorID, VendorName, DaysReceivableOutstanding)	
+values ('388652', 'Panasonic', '91')
+Insert into VendorCompany (VendorID, VendorName, DaysReceivableOutstanding)	
+values ('205463', 'Bell PHarmaceutical', '77')		
+Insert into VendorCompany (VendorID, VendorName, DaysReceivableOutstanding)	
+values ('585672', 'Apple', '37')		
+Insert into VendorCompany (VendorID, VendorName, DaysReceivableOutstanding)	
+values ('444484', 'Black and Decker', '102')		
+Insert into VendorCompany (VendorID, VendorName, DaysReceivableOutstanding)	
+values ('734864', 'Champions', '27')		
+Insert into VendorCompany (VendorID, VendorName, DaysReceivableOutstanding)	
+values ('257915', 'Coca Cola', '6')		
+Insert into VendorCompany (VendorID, VendorName, DaysReceivableOutstanding)	
+values ('732578', 'Ford Group', '117')		
+Insert into VendorCompany (VendorID, VendorName, DaysReceivableOutstanding)	
+values ('221942', 'Energy Inc', '45')		
+Insert into VendorCompany (VendorID, VendorName, DaysReceivableOutstanding)	
+values ('452920', 'Google', '12')		
+Insert into VendorCompany (VendorID, VendorName, DaysReceivableOutstanding)	
+values ('237831', 'Hollywood Beauty', '59')									
+							
+--Table for the Trucking Company							
+Create Table TruckingCompany (							
+	TruckingID int primary key						
+	, TruckingName Varchar (20) not null 						
+	, CashOnHand money not null default '0'						
+)							
+Insert into TruckingCompany (TruckingID, TruckingName, CashOnHand)		
+Values ('111', 'Saia', '1000000')	
+Insert into TruckingCompany (TruckingID, TruckingName, CashOnHand)		
+Values ('222', 'Walmart', '7000000000')	
+Insert into TruckingCompany (TruckingID, TruckingName, CashOnHand)		
+Values ('333', 'Swift', '82486000')	
+Insert into TruckingCompany (TruckingID, TruckingName, CashOnHand)		
+Values ('444', 'Kinght', '82486000')	
+Insert into TruckingCompany (TruckingID, TruckingName, CashOnHand)		
+Values ('555', 'FedEx', '2319000000')	
+				
+-- Table for the buying company							
+Create Table BuyerCompany (							
+	BuyerID int primary key						
+	, BuyerName varchar(20) not null 						
+	, DaysPayableOutstanding varchar (3) not null default '0'						
+	, Retailer varchar(1) not null						
+)	
+Insert into BuyerCompany (	BuyerID, BuyerName, DaysPayableOutstanding, Retailer)
+Values ('001', 'Walmart', '64', '1')						
+Insert into BuyerCompany (	BuyerID, BuyerName, DaysPayableOutstanding, Retailer)
+Values ('002', 'Jet', '64', '1')		
+						
+--Table for the item							
+Create Table Item (							
+	ItemNumber int primary key 						
+	, Nomen varchar(25) not null						
+	, Cost money not null						
+	, Price money not null						
+	, Sortable varchar(1) not null 						
+) 
+						
+Insert into Item(ItemNumber, Nomen, Cost, Price, Sortable)
+Values ('554744014', 'Hulk Hands', '16.92', '18.79', '1')
+Insert into Item(ItemNumber, Nomen, Cost, Price, Sortable)
+Values ('551660157', 'Bread Maker', '40', '49.99', '1')
+Insert into Item(ItemNumber, Nomen, Cost, Price, Sortable)
+Values ('551697871', 'Caffiene Pills', '2', '6.65', '1')
+Insert into Item(ItemNumber, Nomen, Cost, Price, Sortable)
+Values ('555825944', 'Ipad', '345', '799', '1')
+Insert into Item(ItemNumber, Nomen, Cost, Price, Sortable)
+Values ('552012599', 'Power Drill', '95', '159', '1')
+Insert into Item(ItemNumber, Nomen, Cost, Price, Sortable)
+Values ('553144451', 'Black V-neck', '1.15', '4.99', '1')
+Insert into Item(ItemNumber, Nomen, Cost, Price, Sortable)
+Values ('559732741', '12 Pack Coca-Cola', '2', '3.78', '1')
+Insert into Item(ItemNumber, Nomen, Cost, Price, Sortable)
+Values ('559919095', 'Oil', '27', '55', '0')
+Insert into Item(ItemNumber, Nomen, Cost, Price, Sortable)
+Values ('556023006', 'Car Battery', '112', '164.98', '0')
+Insert into Item(ItemNumber, Nomen, Cost, Price, Sortable)
+Values ('553296606', 'Chrome Book', '125', '199', '1')
+Insert into Item(ItemNumber, Nomen, Cost, Price, Sortable)
+Values ('558625427', 'Lip Stick', '4', '18', '1')
+
+--Table for VendorBuyer Relationship. Has foreign keys
+Create Table VendorBuyer (							
+	VendorBuyerID int primary key						
+	, VendorID int foreign key references vendorcompany(VendorID)
+	, TruckingID int foreign key references Truckingcompany(TruckingID)						
+	, BuyerID int foreign key references BuyerCompany(BuyerID)						
+	, ItemNumber int foreign key references Item(ItemNumber)						
+)							
+Insert into VendorBuyer (VendorBuyerID, VendorID, TruckingID, BuyerId, ItemNumber)	
+Values ('1', '472701','111', '001', '554744014')	
+Insert into VendorBuyer (VendorBuyerID, VendorID, TruckingID, BuyerId, ItemNumber)	
+Values ('2', '388652', '111', '002', '551660157')	
+Insert into VendorBuyer (VendorBuyerID, VendorID, TruckingID, BuyerId, ItemNumber)	
+Values ('3', '205463', '333', '001', '551697871')	
+Insert into VendorBuyer (VendorBuyerID, VendorID, TruckingID, BuyerId, ItemNumber)	
+Values ('4', '585672', '444', '002', '555825944')	
+Insert into VendorBuyer (VendorBuyerID, VendorID, TruckingID, BuyerId, ItemNumber)	
+Values ('5', '444484', '111', '001', '552012599')	
+Insert into VendorBuyer (VendorBuyerID, VendorID, TruckingID, BuyerId, ItemNumber)	
+Values ('6', '734864', '555', '001', '553144451')	
+Insert into VendorBuyer (VendorBuyerID, VendorID, TruckingID, BuyerId, ItemNumber)	
+Values ('7', '257915', '222', '001', '559732741')	
+Insert into VendorBuyer (VendorBuyerID, VendorID, TruckingID, BuyerId, ItemNumber)	
+Values ('8', '221942', '222', '001', '556023006')	
+Insert into VendorBuyer (VendorBuyerID, VendorID, TruckingID, BuyerId, ItemNumber)	
+Values ('9', '732578', '333', '001', '559919095')	
+Insert into VendorBuyer (VendorBuyerID, VendorID, TruckingID, BuyerId, ItemNumber)	
+Values ('10', '452920', '444', '002', '553296606')	
+Insert into VendorBuyer (VendorBuyerID, VendorID, TruckingID, BuyerId, ItemNumber)	
+Values ('11', '237831', '222', '001', '558625427')	
+
+-- Adding profit and a profit margin column to my table 
+Alter table item 
+Add Profit money 	
+
+update Item
+Set Profit = Price - Cost
+
+Alter table Item 
+Add ProfitMargin dec(10,2) 
+
+Update Item 
+set ProfitMargin = Profit / Price
+
+--Which Vendors with the highest Days Receivables outstanding have the highest profit margin products?
+Select VendorName, DaysReceivableOutstanding, Nomen, ProfitMargin
+From Item as IT
+Right Join VendorBuyer as VB
+on IT.ItemNumber = VB.ItemNumber
+join VendorCompany as VC
+on VB.VendorID = vc.VendorID
+Order by profitmargin desc, daysreceivableoutstanding Desc 
+
+--Which Trucking Companies with the most cash are transporting the highest profit margin products? 
+Select TruckingName, CashOnHand, Nomen, ProfitMargin
+from VendorCompany as VC
+Join VendorBuyer as VB
+on vc.VendorID = VB.VendorID
+Join Item as IT
+on VB.ItemNumber = It.ItemNumber
+Join TruckingCompany as TC
+on VB.TruckingID = TC.TruckingID
+Order by ProfitMargin Desc
+
+--Which sortable products have a higher than 10% profit margin?
+Select ItemNumber, Nomen, Sortable, ProfitMargin
+From Item
+Where Sortable = 1 and Profitmargin >= .1
+
+--Are there Products with higher than 50% profit margin being sold by vendors with over 100 days receivable outstanding?
+Select VendorName, Nomen, DaysReceivableOutstanding, ProfitMargin
+From VendorCompany as VC
+Join VendorBuyer as VB
+on vc.VendorID = VB.VendorID
+Join Item as IT
+on VB.ItemNumber = It.ItemNumber
+where DaysReceivableOutstanding >= 100
+and ProfitMargin >= .5
+
+--Which Trucking company is delivering the highest margin items?
+Select Top 1 TruckingName, Nomen, ProfitMargin
+from VendorCompany as VC
+Join VendorBuyer as VB
+on vc.VendorID = VB.VendorID
+Join Item as IT
+on VB.ItemNumber = It.ItemNumber
+Join TruckingCompany as TC
+on VB.TruckingID = TC.TruckingID
+Order by ProfitMargin Desc
+
