@@ -1,0 +1,209 @@
+---
+title: "My Project"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(readxl)
+BKHW_Portfolio_2019 <- read_excel("BKHW-Portfolio 2019.xlsx")
+library(flexdashboard)
+library(shiny)
+library(dplyr)
+library(quantmod)
+library(PerformanceAnalytics)
+library(fPortfolio)
+library(xts)
+library(tidyr)
+library(ggplot2)
+library(plotly)
+BKHW <- BKHW_Portfolio_2019
+BKHW <- BKHW[,c(1,6)]
+BKHW <- (BKHW[c(2:11),])
+BKHW <- as.data.frame(BKHW)
+colnames(BKHW[1]) <- "stock"
+colnames(BKHW[2]) <- "2019"
+BKHW
+getSymbols("BRK-A",src="yahoo",from="2017-1-1",to="2020-1-1")
+DRBRK <- dailyReturn((`BRK-A`)[,6])
+MRBRK <- monthlyReturn(DRBRK)
+
+
+getSymbols("AAPL",from="2017-1-1", to = "2020-1-1")
+DRAAPL <- dailyReturn(AAPL$AAPL.Adjusted)
+MRAAPL <- monthlyReturn(DRAAPL)
+
+
+getSymbols("BAC",from="2017-1-1",to="2020-1-1")
+DRBAC <- dailyReturn(BAC$BAC.Adjusted)
+MRBAC <- monthlyReturn(DRBAC)
+
+
+getSymbols("KO",from="2017-1-1",to="2020-1-1")
+DRKO <- dailyReturn(KO$KO.Adjusted)
+MRKO <- monthlyReturn(DRKO)
+
+
+getSymbols("AXP",from="2017-1-1",to="2020-1-1")
+DRAXP <- dailyReturn(AXP$AXP.Adjusted)
+MRAXP <- monthlyReturn(DRAXP)
+
+
+getSymbols("WFC",from="2017-1-1",to="2020-1-1")
+DRWFC <- dailyReturn(WFC$WFC.Adjusted)
+MRWFC <- monthlyReturn(DRWFC)
+
+
+getSymbols("KHC",from="2017-1-1",to="2020-1-1")
+DRKHC <- dailyReturn(KHC$KHC.Adjusted)
+MRKHC <- monthlyReturn(DRKHC)
+
+
+getSymbols("JPM",from="2017-1-1",to="2020-1-1")
+DRJPM <- dailyReturn(JPM$JPM.Adjusted)
+JPM <- monthlyReturn(JPM$JPM.Adjusted)
+
+getSymbols("USB",from="2017-1-1",to="2020-1-1")
+DRUSB <- dailyReturn(USB$USB.Adjusted)
+MRUSB <- monthlyReturn(DRUSB)
+
+getSymbols("MCO",from="2017-1-1",to="2020-1-1")
+DRMCO <- dailyReturn(MCO$MCO.Adjusted)
+MRMCO <- monthlyReturn(DRMCO)
+
+
+getSymbols("DAL",from="2017-1-1",to="2020-1-1")
+DRDAL <- dailyReturn(DAL$DAL.Adjusted)
+MRDAL <- monthlyReturn(DRDAL)
+
+ALLDR <- cbind(DRAAPL,DRBAC,DRKO,DRAXP,DRWFC,DRKHC,DRJPM,DRUSB,DRMCO,DRDAL)
+ALLDR <- na.omit(ALLDR)
+colnames(ALLDR) <- c("Apple", "Bank of America", "Coca-Cola", "American Express", "Wells Fargo", "Kraft Heinz", "J.P Morgan", "U.S. Bancorp", "Moody's Corporation", "Delta Airlines" )
+ALLDRDF <- data.frame(index(ALLDR), coredata(ALLDR))
+colnames(ALLDRDF)[1] <- "DATE"
+ALLDRL <- pivot_longer(ALLDRDF, -DATE, names_to = "Companies", values_to = "Daily.Returns")
+ALLDRL$Daily.Returns <- round(ALLDRL$Daily.Returns, 3)
+DRBRKDF <- data.frame(index(DRBRK),coredata(DRBRK))
+colnames(DRBRKDF) <- c("DATE", "Daily.Returns")
+DRBRKDF$Daily.Returns <- round(DRBRKDF$Daily.Returns, 3)
+BRKplot <- ggplot(DRBRKDF, aes(x=DATE, y=Daily.Returns)) + geom_line() + labs(title= "Berkshire Hathaway")
+PFplot <- ggplot(ALLDRL, aes(x=DATE, y=Daily.Returns, color=Companies)) + geom_line() + facet_wrap(~ALLDRL$Companies, nrow = 5)
+
+BRKW <- Return.portfolio(DRBRK, wealth.index = TRUE)
+AAPLW <- Return.portfolio(DRAAPL, wealth.index = TRUE)
+BACW <- Return.portfolio(DRBAC, wealth.index = TRUE)
+KOW <- Return.portfolio(DRKO, wealth.index = TRUE)
+AXPW <- Return.portfolio(DRAXP, wealth.index = TRUE)
+WFCW <- Return.portfolio(DRWFC, wealth.index = TRUE)
+KHCW <- Return.portfolio(DRKHC, wealth.index = TRUE)
+JPMW <- Return.portfolio(DRJPM, wealth.index = TRUE)
+USBW <- Return.portfolio(DRUSB, wealth.index = TRUE)
+MCOW <- Return.portfolio(DRMCO, wealth.index = TRUE)
+DALW <- Return.portfolio(DRDAL, wealth.index = TRUE)
+
+WIALL <- cbind(BRKW, AAPLW,BACW,KOW,AXPW,WFCW,KHCW,JPMW,USBW,MCOW,DALW)
+colnames(WIALL) <- c("Berkshire","Apple", "Bank of America", "Coca-Cola", "American Express", "Wells Fargo", "Kraft Heinz", "J.P Morgan", "U.S. Bancorp", "Moody's Corporation", "Delta Airlines" )
+WIDF <- data.frame(index(WIALL), coredata(WIALL))
+colnames(WIDF) <- c("DATE", "Berkshire","Apple", "Bank of America", "Coca-Cola", "American Express", "Wells Fargo", "Kraft Heinz", "J.P Morgan", "U.S. Bancorp", "Moody's Corporation", "Delta Airlines" )
+
+WIDFL <- pivot_longer(WIDF, -DATE, names_to = "Companies", values_to = "Wealth.Index")
+WIDFL$Wealth.Index <- round(WIDFL$Wealth.Index, 4)
+WIplot <- ggplot(WIDFL, aes(x=DATE, y=Wealth.Index, color= Companies)) + geom_line() + facet_wrap(~WIDFL$Companies, nrow = 3)
+
+
+pf <- cbind(DRAAPL,DRBAC,DRKO,DRAXP,DRWFC,DRKHC,DRJPM,DRUSB,DRMCO,DRDAL)
+colnames(pf) <- c("Apple", "Bank of America", "Coca-Cola", "American Express", "Wells Fargo", "Kraft Heinz", "J.P Morgan", "U.S. Bancorp", "Moody's Corporation", "Delta Airlines" )
+pf <- as.timeSeries(pf)
+any(is.na(pf))
+pf <- na.omit(pf)
+minrisk <- minvariancePortfolio(pf)
+minrisk
+rf <- portfolioSpec()
+400 -> setNFrontierPoints(rf)
+.0017 -> setRiskFreeRate(rf) 
+rf
+tangencyPortfolio(pf, rf) -> maxsharpe
+maxsharpe
+myfrontier <- portfolioFrontier(pf, rf)
+mypoints <- frontierPoints(myfrontier)
+myweights <- getWeights(myfrontier)
+head(mypoints)
+head(myweights)
+MaxSharpeweights <- getWeights(maxsharpe)
+MaxSharpeweights
+combined <- cbind(mypoints, myweights)
+combined <- as.data.frame(combined)
+TPF <- ggplot(combined , aes(x=targetRisk, y=targetReturn)) + geom_point() + xlab("Standard Deviation of Daily Returns") + ylab("Expected Daily Return")
+
+DRbkpf <- Return.portfolio(ALLDR, weights = c(.2974,.1346,.0915,.078,.0718,.0432,.0343,.0324,.0242,.0171), geometric = FALSE)
+Berkshire.PortfolioWI <- Return.portfolio(DRbkpf, wealth.index=TRUE)
+Berkshire.PortfolioWI <- Berkshire.PortfolioWI*100000
+
+
+
+DRbk <- Return.portfolio(DRBRK, geometric = FALSE)
+DRbkWI <- Return.portfolio(DRbk, wealth.index = TRUE)
+BerkshireWI <- DRbkWI*100000
+
+
+
+MaxSharpeWI <- Return.portfolio(ALLDR, weights = c(1,0,0,0,0,0,0,0,0,0), geometric = FALSE)
+MaxSharpeWI <- Return.portfolio(MaxSharpeWI, wealth.index = TRUE)
+MaxSharpeWI <- MaxSharpeWI*100000
+
+
+
+MinRiskWI <- Return.portfolio(ALLDR, weights = c(.0555,0,.5288,.0212,.0301,.04,0,.2669,.0427,.0149), geometric = FALSE)
+MinRiskWI <- Return.portfolio(MinRiskWI, wealth.index = TRUE)
+MinRiskWI <- MinRiskWI*100000
+
+
+ALLWI <- cbind(BerkshireWI, Berkshire.PortfolioWI, MaxSharpeWI, MinRiskWI)
+ALLWI <- data.frame(index(ALLWI),coredata(ALLWI))
+colnames(ALLWI) <- c("DATE","BerkshireWI", "Berkshire.PortfolioWI", "MaxSharpeWI", "MinRiskWI")
+ALLWI <- pivot_longer(ALLWI, -DATE, names_to = "Portfolio", values_to = "Wealth.Index")
+ALLWIplot <- ggplot(ALLWI, aes(x=DATE, y=Wealth.Index, color= Portfolio)) + geom_line()
+```
+Page 1 
+==================================
+
+Row {.tabset .tabset-fade}
+----------------------------------
+
+### Portfolio Time Series
+
+```{r}
+ggplotly(PFplot)
+```
+
+### Berkshire Time Series
+```{r}
+ggplotly(BRKplot)
+
+```
+
+Page 2 
+===================================
+### Welath Indecies
+```{r}
+ggplotly(WIplot)
+
+```
+
+Page 3 
+===================================
+### Tangency Portfolio
+```{r}
+ggplotly(TPF)
+
+```
+
+Page 4
+===================================
+### WHats better?
+```{r}
+ggplotly(ALLWIplot)
+```
+
